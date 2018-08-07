@@ -1,0 +1,326 @@
+template <class T>
+GraphType<T>::GraphType()
+//	Post:	Arrays of size 50 are dynamically allocated for marks and vertices.
+//			numVertices is set to 0; maxVertices is set to 50.
+{
+	numVertices = 0;
+	maxVertices = 50;
+	vertices = new T[50];
+	marks = new bool[50];
+	edges = new int*[50];
+	for (int i = 0; i < 50; i++){
+		edges[i] = new int[50];
+		for (int k = 0; k < 50; k++){
+			edges[i][k] = NULL_EDGE;
+		}
+	}
+}
+
+template <class T>
+GraphType<T>::GraphType(int maxV)
+//	Post:	Arrays of size maxV are dynamically allocated for marks and vertices.
+//			numVertices is 0; maxVertices is maxV.
+{
+	numVertices = 0;
+	maxVertices = maxV;
+	vertices = new T[maxV];
+	marks = new bool[maxV];
+	edges = new int*[maxV];
+	for (int i = 0; i < maxV; i++) {
+		edges[i] = new int[maxV];
+		for (int k = 0; k < maxV; k++){
+			edges[i][k] = NULL_EDGE;
+		}
+	}
+}
+
+template <class T>
+GraphType<T>::GraphType(const GraphType<T>& src)
+//	Post:	A copy of src is made
+{
+	numVertices = src.numVertices;
+	maxVertices = src.maxVertices;
+	vertices = new T[maxVertices];
+	marks = new bool[maxVertices];
+	edges = new int*[maxVertices];
+	for (int i = 0; i < maxVertices; i++)
+	{
+		vertices[i] = src.vertices[i];
+		marks[i] = src.marks[i];
+		edges[i] = src.edges[i];
+	}
+}
+
+template <class T>
+void GraphType<T>::operator =(const GraphType<T>& src)
+//	Post:	A copy of src is made
+{
+	if (this != src)
+	{
+		numVertices = src.numVertices;
+		maxVertices = src.maxVertices;
+		vertices = new T[maxVertices];
+		marks = new bool[maxVertices];
+		edges = new int*[maxVertices];
+		for (int i = 0; i < maxVertices; i++)
+		{
+			vertices[i] = src.vertices[i];
+			marks[i] = src.marks[i];
+			edges[i] = src.edges[i];
+		}
+	}
+}
+
+template <class T>
+GraphType<T>::~GraphType()
+//	Post:	Arrays for vertices and marks have been deallocated.
+{
+	delete[] vertices;
+	delete[] edges;
+	delete[] marks;
+}
+
+template <class T>
+void GraphType<T>::MakeEmpty()
+//	Post:	Graph is empty
+{
+	numVertices = 0;
+}
+
+template <class T>
+bool GraphType<T>::IsEmpty()
+//	Fctn:	Tests whether the graph is empty
+//	Post:	Function value = (graph is empty)
+{
+	return numVertices == 0;
+}
+
+template <class T>
+bool GraphType<T>::IsFull()
+// Fctn:	Tests whether the graph is full
+// Post:	Function value = (graph is full)
+{
+	return numVertices == maxVertices;
+}
+
+template <class T>
+void GraphType<T>::AddVertex(T vertex)
+//	Fctn:	Adds a vertex to the graph
+//	Pre:	Graph is not full
+//	Post:	vertex has been added to vertices
+//			corresponding row and column of edges has been set
+//			to NULL_EDGE
+//			numVertices has been incremented.
+{
+	vertices[numVertices] = vertex;
+	
+	for (int i = 0; i < numVertices; i++)
+	{
+		edges[numVertices][i] = NULL_EDGE;
+		edges[i][numVertices] = NULL_EDGE;
+	}
+
+	numVertices++;
+}
+
+template <class T>
+void GraphType<T>::DeleteVertex(T vertex)
+//	Fctn:	Deletes a vertex from the graph
+//	Post:	vertex has been deleted
+//			corresponding row and column of edges has been set to NULL_EDGE
+//			numVertices has been decremented.
+{
+	index = IndexIs(vertices, vertex);
+
+	for (int i = 0; i < index; i++)
+	{
+		edges[index][i] = NULL_EDGE;
+		edges[i][index] = NULL_EDGE;
+	}
+
+	numVertices--;
+}
+
+template <class T>
+int GraphType<T>::IndexIs(T* vertices, T vertex)
+//	Post:	returns the index of vertex in vertices.
+{
+	int index = 0;
+	while (!(vertex == vertices[index]))
+		index++;
+	return index;
+}
+
+template <class T>
+void GraphType<T>::AddEdge(T fromVertex, T toVertex, int weight)
+//	Fctn:	Adds an edge with the specified weight from fromVertex to toVertex
+//	Pre:	fromVertex and toVertex are in the graph
+//	Post:	Edge(fromVertex,toVertex) is added to edges with the specified weight
+{
+	int row;
+	int col;
+
+	row = IndexIs(vertices, fromVertex);
+	col = IndexIs(vertices, toVertex);
+	edges[row][col] = weight;
+}
+
+template <class T>
+void GraphType<T>::DeleteEdge(T fromVertex, T toVertex)
+//	Fctn:	Deletes an edge from the graph
+//	Pre:	fromVertex and toVertex are in the graph
+//	Post:	Edge(fromVetex, toVertex) is now set to NULL_EDGE
+{
+	int row;
+	int col;
+
+	row = IndexIs(vertices, fromVertex);
+	col = IndexIs(vertices, toVertex);
+	edges[row][col] = NULL_EDGE;
+}
+
+template <class T>
+int GraphType<T>::GetWeight(T fromVertex, T toVertex)
+//	Fctn:	Determines the weight of the edge from fromVertex to toVertex
+//	Pre:	fromVertex and toVertex are in V(graph)
+//	Post:	Returns the weight associated with the edge
+//			(fromVertex,toVertex).
+{
+	int row;
+	int col;
+
+	row = IndexIs(vertices, fromVertex);
+	col = IndexIs(vertices, toVertex);
+	return edges[row][col];
+}
+
+template <class T>
+void GraphType<T>::GetToVertices(T vertex, llqueue<T>& adjVertices)
+//	Fctn:	Returns a queue of the vertices that are adjacent from vertex.
+//	Pre:	vertex is in V(graph)
+//	Post:	Returns a queue of  vetices adjacent from vertex.
+{
+	int fromIndex;
+	int toIndex;
+	
+	fromIndex = IndexIs(vertices, vertex);
+	for (toIndex = 0; toIndex < numVertices; toIndex++)
+		if (edges[fromIndex][toIndex] != NULL_EDGE)
+			adjVertices.Enqueue(vertices[toIndex]);
+}
+
+template <class T>
+void GraphType<T>::ClearMarks()
+// Function:	Sets marks for all vertices to false
+// Post:		All marks have been set to false
+{
+	for (int i = 0; i < maxVertices; i++)
+		marks[i] = false;
+}
+
+template <class T>
+void GraphType<T>::MarkVertex(T vertex)
+// Function:	Sets mark for vertex to true
+// Pre:			vertex is in V(graph).
+// Post:		IsMarked(vertex) is true
+{
+	marks[IndexIs(vertices, vertex)] = true;
+}
+
+template <class T>
+bool GraphType<T>::IsMarked(T vertex)
+// Function:	Determines if vertex has been marked
+// Pre:			vertex is in V(graph)
+// Post:		Function value = (vertex is marked true)
+{
+	return marks[IndexIs(vertices, vertex)];
+}
+
+template <class T>
+void DepthFirstSearch(GraphType<T> graph, T startVertex, T endVertex)
+//	Fctn:	Prints the path from startVertex to toVertex
+{
+	std::stack<T> stack;
+	llqueue<T> vertexQ;
+
+	bool found = false;
+	T vertex;
+	T item;
+
+	graph.ClearMarks();
+	stack.push(startVertex);
+	do
+	{
+		vertex = stack.top();
+		stack.pop();
+		
+		if (vertex == endVertex)
+		{
+			cout << vertex;
+			found = true;
+		}
+		else
+		{
+			if (!graph.IsMarked(vertex))
+			{
+				graph.MarkVertex(vertex);
+				cout << vertex;
+				graph.GetToVertices(vertex, vertexQ);
+
+				while (!vertexQ.isEmpty())
+				{
+					vertexQ.Dequeue(item);
+					if (!graph.IsMarked(item))
+						stack.push(item);
+				}
+			}
+		}
+	} while (!stack.empty() && !found);
+	if (!found)
+		cout << "Path not found." << endl;
+
+}
+
+template <class T>
+void BreadthFirstSearch(GraphType<T> graph, T startVertex, T endVertex)
+//	Fctn:	Prints the path from startVertex to toVertex
+{
+	llqueue<T> queue;
+	llqueue<T> vertexQ;
+
+	bool found = false;
+	T vertex;
+	T item;
+
+	graph.ClearMarks();
+	queue.Enqueue(startVertex);
+
+	do
+	{
+		queue.Dequeue(vertex);
+
+		if (vertex == endVertex)
+		{
+			cout << vertex;
+			found = true;
+		}
+		else
+		{
+			if (!graph.IsMarked(vertex))
+			{
+				graph.MarkVertex(vertex);
+				cout << vertex;
+				graph.GetToVertices(vertex, vertexQ);
+
+				while (!vertexQ.isEmpty())
+				{
+					vertexQ.Dequeue(item);
+					if (!graph.IsMarked(item))
+						queue.Enqueue(item);
+				}
+			}
+		}
+	} while (!queue.isEmpty() && !found);
+	if (!found)
+		cout << "Path not found." << endl;
+}

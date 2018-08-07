@@ -1,0 +1,114 @@
+#include <cassert>
+
+template <class T>
+llqueue<T>::llqueue(){
+	qFront = NULL;
+	qRear = NULL;
+	length = 0;
+}
+
+template <class T>
+llqueue<T>::~llqueue()
+{
+	makeEmpty();
+}
+
+template <class T>
+llqueue<T>::llqueue(const llqueue<T> & acopy){
+	qFront = new NodeType<T>;
+	length = acopy.length;
+	NodeType<T> * tmp = acopy.qFront;
+	qFront->info = tmp->info;
+	NodeType<T> * tmp2 = qFront;
+	qFront->next = new NodeType<T>;
+	while (tmp->next != NULL){
+		tmp2 = tmp2->next;
+		tmp = tmp->next;
+		tmp2->info = tmp->info;
+		if (tmp->next != NULL)
+			tmp2->next = new NodeType<T>;
+	}
+	tmp->next = NULL;
+	qRear = tmp;
+}
+
+template <class T>
+void llqueue<T>::operator = (const llqueue<T> & acopy){
+	if (this == acopy) return;
+	
+	qFront = new NodeType<T>;
+	length = acopy.length;
+	NodeType<T> * tmp = acopy.qFront;
+	qFront->info = tmp->info;
+	NodeType<T> * tmp2 = qFront;
+	qFront->next = new NodeType<T>;
+	while (tmp->next != NULL){
+		tmp2 = tmp2->next;
+		tmp = tmp->next;
+		tmp2->info = tmp->info;
+		if (tmp->next != NULL)
+			tmp2->next = new NodeType<T>;
+	}
+	tmp->next = NULL;
+	qRear = tmp;
+}
+
+template <class T>
+bool llqueue<T>::isFull() const{
+	NodeType<T> * tmp = new NodeType<T>;
+	if (tmp == NULL) return true;
+	delete tmp;
+	return false;
+}
+
+template <class T>
+bool llqueue<T>::isEmpty() const{
+	return qFront == NULL;
+}
+
+template <class T>
+void llqueue<T>::Enqueue(T item){
+	NodeType<T> *tmp = new NodeType<T>;
+	tmp->info = item;
+	tmp->next = NULL;
+	if (qFront == NULL)
+		qFront = tmp;
+	else
+		qRear->next = tmp;
+	qRear = tmp;
+	length++;
+}
+
+template <class T>
+void llqueue<T>::Dequeue(T& item){
+	NodeType<T> * tmp = qFront;
+	item = tmp->info;
+	qFront = tmp->next;
+	delete tmp;
+	if (qFront == NULL)
+		qRear = NULL;
+	length--;
+}
+
+template <class T>
+void llqueue<T>::makeEmpty(){
+	NodeType<T> * tmp = qFront;
+	while (qFront != NULL)
+	{
+		qFront = qFront->next;
+		delete tmp;
+		tmp = qFront;
+	}
+	qRear = NULL;
+	length = 0;
+}
+
+template <class T>
+T llqueue<T>::peek() const{
+	return qFront->info;
+}
+
+template <class T>
+int llqueue<T>::getLength() const{
+	return length;
+}
